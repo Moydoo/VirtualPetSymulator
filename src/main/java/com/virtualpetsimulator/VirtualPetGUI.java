@@ -1,6 +1,7 @@
 package com.virtualpetsimulator;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -9,13 +10,14 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class VirtualPetGUI extends Application {
-    private static Pet pet;
-    private static GameManager gameManager;
+    private Pet pet;
+    private GameManager gameManager;
 
-    // Static method to set pet and gameManager
-    public static void setPetAndGameManager(Pet pet, GameManager gameManager) {
-        VirtualPetGUI.pet = pet;
-        VirtualPetGUI.gameManager = gameManager;
+    @Override
+    public void init() {
+        // Initialize pet and gameManager here
+        this.pet = new Pet("Buddy"); // Default pet
+        this.gameManager = new GameManager(pet);
     }
 
     @Override
@@ -41,21 +43,29 @@ public class VirtualPetGUI extends Application {
         feedButton.setOnAction(e -> {
             pet.feed();
             updateLabels(hungerLabel, happinessLabel, healthLabel, cleanlinessLabel);
+            checkIfPetDied(primaryStage);
         });
 
         playButton.setOnAction(e -> {
             pet.play();
             updateLabels(hungerLabel, happinessLabel, healthLabel, cleanlinessLabel);
+            checkIfPetDied(primaryStage);
         });
 
         cleanButton.setOnAction(e -> {
             pet.clean();
             updateLabels(hungerLabel, happinessLabel, healthLabel, cleanlinessLabel);
+            checkIfPetDied(primaryStage);
         });
 
         sleepButton.setOnAction(e -> {
-            pet.sleep();
-            updateLabels(hungerLabel, happinessLabel, healthLabel, cleanlinessLabel);
+            boolean slept = pet.sleep();
+            if (slept) {
+                updateLabels(hungerLabel, happinessLabel, healthLabel, cleanlinessLabel);
+                checkIfPetDied(primaryStage);
+            } else {
+                System.out.println("Your pet is too dirty to sleep! Clean it first.");
+            }
         });
 
         saveButton.setOnAction(e -> {
@@ -81,7 +91,7 @@ public class VirtualPetGUI extends Application {
         );
 
         // Set the scene
-        Scene scene = new Scene(layout, 300, 300);
+        Scene scene = new Scene(layout, 300, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -92,5 +102,13 @@ public class VirtualPetGUI extends Application {
         happinessLabel.setText("Happiness: " + pet.getHappiness());
         healthLabel.setText("Health: " + pet.getHealth());
         cleanlinessLabel.setText("Cleanliness: " + pet.getCleanliness());
+    }
+
+    // Method to check if the pet has died
+    private void checkIfPetDied(Stage primaryStage) {
+        if (!pet.isAlive()) {
+            System.out.println("Your pet has died. Game over!");
+            Platform.exit(); // Close the JavaFX application
+        }
     }
 }
