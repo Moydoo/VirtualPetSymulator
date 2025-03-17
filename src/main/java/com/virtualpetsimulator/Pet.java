@@ -30,7 +30,7 @@ public class Pet {
             public void run() {
                 decayStats();
             }
-        }, 0, 60000); // Decay every 60 seconds (1 minute)
+        }, 0, 30000); // Decay every 60 seconds (1 minute)
     }
 
     // Decay stats over time
